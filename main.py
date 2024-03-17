@@ -4,7 +4,7 @@ from qtable import QTable
 from single_agent_mcts import SingleAgentMCTS
 from upper_confidence_bounds import UpperConfidenceBounds
 
-for i in range(20):
+for i in range(10):
     gridworld = GridWorld()
     qfunction = QTable()
     root_node = SingleAgentMCTS(gridworld, qfunction, UpperConfidenceBounds()).mcts(timeout=0.001 + i * 0.001)
