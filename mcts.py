@@ -1,122 +1,83 @@
 import math
-import time
 import random
-from collections import defaultdict
-
 
 class Node:
+    def __init__(self, state, parent=None):
+        self.state = state      # TicTacToe instance
+        self.parent = parent    # Node instance
+        self.children = []      # List of Node instances
+        self.value = 0          # Value of the node : sum of wins - sum of losses
+        self.visits = 0         # Number of visits
 
-    # Record a unique node id to distinguish duplicated states
-    next_node_id = 0
+    def is_fully_expanded(self):
+        return len(self.children) == len(self.state.get_legal_moves())
 
-    # Records the number of times states have been visited
-    visits = defaultdict(lambda: 0)
+    def select_child(self, exploration_constant):
+        """Select a child node according to the UCB1 formula."""
+        best_child = None
+        best_score = float('-inf')
+        for child in self.children:
+            exploit = child.value / child.visits if child.visits != 0 else 0
+            explore = math.sqrt(math.log(self.visits) / child.visits) if child.visits != 0 else float('inf')
+            score = exploit + exploration_constant * explore
+            if score > best_score:
+                best_score = score
+                best_child = child
+        return best_child
 
-    def __init__(self, mdp, parent, state, qfunction, bandit, reward=0.0, action=None):
-        self.mdp = mdp
-        self.parent = parent
-        self.state = state
-        self.id = Node.next_node_id
-        Node.next_node_id += 1
-
-        # The Q function used to store state-action values
-        self.qfunction = qfunction
-
-        # A multi-armed bandit for this node
-        self.bandit = bandit
-
-        # The immediate reward received for reaching this state, used for backpropagation
-        self.reward = reward
-
-        # The action that generated this node
-        self.action = action
-
-    """ Select a node that is not fully expanded """
-
-    def select(self): abstract
-
-
-    """ Expand a node if it is not a terminal node """
-
-    def expand(self): abstract
-
-
-    """ Backpropogate the reward back to the parent node """
-
-    def back_propagate(self, reward, child): abstract
-
-
-    """ Return the value of this node """
-
-    def get_value(self):
-        (_, max_q_value) = self.qfunction.get_max_q(
-            self.state, self.mdp.get_actions(self.state)
-        )
-        return max_q_value
-
-    """ Get the number of visits to this state """
-
-    def get_visits(self):
-        return Node.visits[self.state]
-
+    def add_child(self, child_state):
+        child = Node(child_state, self)
+        self.children.append(child)
+        return child
 
 class MCTS:
-    def __init__(self, mdp, qfunction, bandit):
-        self.mdp = mdp
-        self.qfunction = qfunction
-        self.bandit = bandit
+    def __init__(self, exploration_constant=1.4, iterations=1000):
+        self.exploration_constant = exploration_constant
+        self.iterations = iterations
 
-    """
-    Execute the MCTS algorithm from the initial state given, with timeout in seconds
-    """
+    def search(self, initial_state):
+        root = Node(initial_state)
+        player = 'X' if initial_state.player_turn() else 'O'
 
-    def mcts(self, timeout=1, root_node=None):
-        if root_node is None:
-            root_node = self.create_root_node()
+        for _ in range(self.iterations):
+            node = root
+            state = initial_state.copy()
 
-        start_time = time.time()
-        current_time = time.time()
-        while current_time < start_time + timeout:
+            # Select
+            while node.is_fully_expanded() and not node.state.is_terminal():
+                node = node.select_child(self.exploration_constant)
+                state.apply_move(node.state.last_move)
 
-            # Find a state node to expand
-            selected_node = root_node.select()
-            if not self.mdp.is_terminal(selected_node):
+            # Expand
+            if not node.is_fully_expanded() and not state.is_terminal():
+                unvisited = [move for move in state.get_legal_moves() if move not in [child.state.last_move for child in node.children]]
+                move = random.choice(unvisited)
+                state.apply_move(move)
+                node = node.add_child(state)
 
-                child = selected_node.expand()
-                reward = self.simulate(child)
-                selected_node.back_propagate(reward, child)
+            # Rollout
+            while not state.is_terminal():
+                move = random.choice(state.get_legal_moves())
+                state.apply_move(move)
 
-            current_time = time.time()
+            # Backpropagate
+            while node is not None:
+                node.visits += 1
+                if state.is_winner(player):
+                    node.value += 1
+                elif state.is_draw():
+                    pass
+                else:
+                    node.value -= 1
+                node = node.parent
 
-        return root_node
-
-    """ Create a root node representing an initial state """
-
-    def create_root_node(self): abstract
+        return max(root.children, key=lambda node: node.visits).state.last_move
 
 
-    """ Choose a random action. Heustics can be used here to improve simulations. """
 
-    def choose(self, state):
-        return random.choice(self.mdp.get_actions(state))
+            
 
-    """ Simulate until a terminal state """
+            
 
-    def simulate(self, node):
-        state = node.state
-        cumulative_reward = 0.0
-        depth = 0
-        while not self.mdp.is_terminal(state):
-            # Choose an action to execute
-            action = self.choose(state)
+            
 
-            # Execute the action
-            (next_state, reward) = self.mdp.execute(state, action)
-
-            # Discount the reward
-            cumulative_reward += pow(self.mdp.get_discount_factor(), depth) * reward
-            depth += 1
-
-            state = next_state
-
-        return cumulative_reward

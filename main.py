@@ -1,13 +1,16 @@
-from gridworld import GridWorld
-from graph_visualisation import GraphVisualisation
-from qtable import QTable
-from single_agent_mcts import SingleAgentMCTS
-from upper_confidence_bounds import UpperConfidenceBounds
+from tictactoe import TicTacToe
+from mcts import MCTS
 
-for i in range(10):
-    gridworld = GridWorld()
-    qfunction = QTable()
-    root_node = SingleAgentMCTS(gridworld, qfunction, UpperConfidenceBounds()).mcts(timeout=0.001 + i * 0.001)
-    gv = GraphVisualisation(max_level=6)
-    graph = gv.single_agent_mcts_to_graph(root_node, filename=f"mcts{i}")
-    graph.render(directory='images', view=False)
+# Example of using MCTS to play Tic-Tac-Toe
+player = input("Do you want to play first? (y/n): ") == "y"
+game = TicTacToe()
+mcts = MCTS(iterations=1000)
+while not game.is_terminal():
+    if game.player_turn() == player:
+        move = int(input("Your move: "))
+    else:
+        move = mcts.search(game)
+        print("AI chooses move:", move)
+    game.apply_move(move)
+    game.print_board()
+print("Winner is player", game.current_winner)
