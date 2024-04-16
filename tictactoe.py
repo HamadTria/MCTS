@@ -1,11 +1,13 @@
 from copy import deepcopy
 from mcts import *
 
+MAX_ITER = 1000
+
 class TicTacToe():
     def __init__(self, board=None):
         self.player_1 = 'x'
         self.player_2 = 'o'
-        self.empty_square = '.'
+        self.empty_square = '_'
         self.position = {}
         self.init_board()
         if board is not None:
@@ -71,7 +73,7 @@ class TicTacToe():
                 self = self.make_move(pos)
                 print(self)
 
-                best_move = mcts.search(self)
+                best_move = mcts.search(self, MAX_ITER)
                 try:
                     self = best_move.board
                 except:
