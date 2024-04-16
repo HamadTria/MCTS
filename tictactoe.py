@@ -88,7 +88,7 @@ class TicTacToe():
             except Exception as e:
                 print('  Error:', e)
                 print('  Illegal command!')
-                print('  Move format [x,y]: 1,2 where 1 is column and 2 is row')
+                print('  Move format 0 to 8')
 
     def __str__(self):
         board_string = ''
