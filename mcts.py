@@ -15,10 +15,10 @@ class TreeNode():
         self.children = {}
 
 class MCTS():
-    def search(self, initial_state):
+    def search(self, initial_state, max_iterations=1000):
         self.root = TreeNode(initial_state, None)
 
-        for iteration in range(1000):
+        for _ in range(max_iterations):
             node = self.select(self.root)
             score = self.rollout(node.board)
             self.backpropagate(node, score)
@@ -70,7 +70,11 @@ class MCTS():
         for child_node in node.children.values():
             if child_node.board.player_2 == 'x': current_player = 1
             elif child_node.board.player_2 == 'o': current_player = -1
-            move_score = current_player * child_node.score / child_node.visits + exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))                                        
+
+            exploration = exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))   
+            exploitation = current_player * child_node.score / child_node.visits                                  
+            move_score = exploitation + exploration
+            
             if move_score > best_score:
                 best_score = move_score
                 best_moves = [child_node]
