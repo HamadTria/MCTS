@@ -1,7 +1,7 @@
 import math
 import random
 
-class TreeNode():
+class Node():
     def __init__(self, board, parent):
         self.board = board
         if self.board.is_win() or self.board.is_draw():
@@ -16,13 +16,13 @@ class TreeNode():
 
 class MCTS():
     def search(self, initial_state, max_iterations=1000):
-        self.root = TreeNode(initial_state, None)
+        self.root = Node(initial_state, None)
 
         for _ in range(max_iterations):
             node = self.select(self.root)
             score = self.rollout(node.board)
             self.backpropagate(node, score)
-            
+
         try:
             return self.get_best_move(self.root, 0)
         except:
@@ -40,7 +40,7 @@ class MCTS():
         states = node.board.legal_moves()
         for state in states:
             if str(state.position) not in node.children:
-                new_node = TreeNode(state, node)
+                new_node = Node(state, node)
                 node.children[str(state.position)] = new_node
 
                 if len(states) == len(node.children):
