@@ -23,10 +23,7 @@ class MCTS():
             score = self.rollout(node.board)
             self.backpropagate(node, score)
 
-        try:
-            return self.get_best_move(self.root, 0)
-        except:
-            pass
+        return self.get_best_move(self.root, 0)
     
     def select(self, node):
         while not node.is_terminal:
@@ -53,7 +50,6 @@ class MCTS():
                 board = random.choice(board.legal_moves())
             except:
                 return 0
-            
         if board.player_2 == 'x': return 1
         elif board.player_2 == 'o': return -1
                 
