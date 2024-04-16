@@ -1,83 +1,93 @@
-import math
+import math 
 import random
 
-class Node:
-    def __init__(self, state, parent=None):
-        self.state = state      # TicTacToe instance
-        self.parent = parent    # Node instance
-        self.children = []      # List of Node instances
-        self.value = 0          # Value of the node : sum of wins - sum of losses
-        self.visits = 0         # Number of visits
+class Node():
+    def __init__(self, board, parent):
+        if self.board.is_win() or self.board.is_draw():
+            self.is_terminal = True
+        else:
+            self.is_terminal = False
+        self.fully_expanded = self.is_terminal
+        self.board = board
+        self.parent = parent
+        self.visits = 0
+        self.score = 0
+        self.children = {}
 
-    def is_fully_expanded(self):
-        return len(self.children) == len(self.state.get_legal_moves())
+class MCTS():
+    def search(self, initial_state, max_iterations=1000):
+        self.root = Node(initial_state, None)
+        for _ in range(max_iterations):
+            node = self.select(self.root)
+            score = self.rollout(node.board)
+            self.backpropagate(node, score)
 
-    def select_child(self, exploration_constant):
-        """Select a child node according to the UCB1 formula."""
-        best_child = None
+        try:
+            return self.get_best_move(self.root, 0)
+        
+        except:
+            pass
+
+    def select(self, node):
+        while not node.is_terminal:
+            if node.fully_expanded:
+                node = self.get_best_move(node, 2)
+            else:
+                return self.expand(node)
+
+        return node
+    
+    def expand(self, node):
+        legal_moves = node.board.legal_moves()
+        for state in legal_moves:
+            if str(state.position) not in node.children:
+                new_node = Node(state, node)
+                node.children[str(state.position)] = new_node
+                if len(legal_moves) == len(node.children):
+                    node.is_fully_expanded = True
+                return new_node
+            
+    def rollout(self, board):
+        while not board.is_win():
+            try:
+                board = random.choice(board.legal_moves())
+            except:
+                return 0
+        if board.player_2 == 'x': return 1
+        elif board.player_2 == 'o': return -1
+
+    def backpropagate(self, node, score):
+        while node is not None:
+            node.visits += 1
+            node.score += score
+            node = node.parent
+
+    def get_best_move(self, node, exploration_constant):
         best_score = float('-inf')
-        for child in self.children:
-            exploit = child.value / child.visits if child.visits != 0 else 0
-            explore = math.sqrt(math.log(self.visits) / child.visits) if child.visits != 0 else float('inf')
-            score = exploit + exploration_constant * explore
-            if score > best_score:
-                best_score = score
-                best_child = child
-        return best_child
+        best_moves = []
+        for child_node in node.children.values():
+            if child_node.board.player_2 == 'x': current_player = 1
+            elif child_node.board.player_2 == 'o': current_player = -1
+            exploitation = current_player* child_node.score / child_node.visits
+            exploration = exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))
+            move_score = exploitation + exploration
 
-    def add_child(self, child_state):
-        child = Node(child_state, self)
-        self.children.append(child)
-        return child
+            if move_score > best_score:
+                best_score = move_score
+                best_moves = [child_node]
 
-class MCTS:
-    def __init__(self, exploration_constant=1.4, iterations=1000):
-        self.exploration_constant = exploration_constant
-        self.iterations = iterations
+            elif move_score == best_score:
+                best_moves.append(child_node)
 
-    def search(self, initial_state):
-        root = Node(initial_state)
-        player = 'X' if initial_state.player_turn() else 'O'
-
-        for _ in range(self.iterations):
-            node = root
-            state = initial_state.copy()
-
-            # Select
-            while node.is_fully_expanded() and not node.state.is_terminal():
-                node = node.select_child(self.exploration_constant)
-                state.apply_move(node.state.last_move)
-
-            # Expand
-            if not node.is_fully_expanded() and not state.is_terminal():
-                unvisited = [move for move in state.get_legal_moves() if move not in [child.state.last_move for child in node.children]]
-                move = random.choice(unvisited)
-                state.apply_move(move)
-                node = node.add_child(state)
-
-            # Rollout
-            while not state.is_terminal():
-                move = random.choice(state.get_legal_moves())
-                state.apply_move(move)
-
-            # Backpropagate
-            while node is not None:
-                node.visits += 1
-                if state.is_winner(player):
-                    node.value += 1
-                elif state.is_draw():
-                    pass
-                else:
-                    node.value -= 1
-                node = node.parent
-
-        return max(root.children, key=lambda node: node.visits).state.last_move
+        return random.choice(best_moves)
+    
+                                         
 
 
 
-            
+        
 
-            
 
-            
+        
+
 
