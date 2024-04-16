@@ -1,93 +1,107 @@
-import math 
+import math
 import random
 
-class Node():
+class TreeNode():
     def __init__(self, board, parent):
+        self.board = board
         if self.board.is_win() or self.board.is_draw():
             self.is_terminal = True
         else:
             self.is_terminal = False
-        self.fully_expanded = self.is_terminal
-        self.board = board
+        self.is_fully_expanded = self.is_terminal
         self.parent = parent
         self.visits = 0
         self.score = 0
         self.children = {}
 
 class MCTS():
-    def search(self, initial_state, max_iterations=1000):
-        self.root = Node(initial_state, None)
-        for _ in range(max_iterations):
+    def search(self, initial_state):
+        self.root = TreeNode(initial_state, None)
+
+        for iteration in range(1000):
             node = self.select(self.root)
             score = self.rollout(node.board)
             self.backpropagate(node, score)
-
         try:
             return self.get_best_move(self.root, 0)
         
         except:
             pass
-
+    
     def select(self, node):
         while not node.is_terminal:
-            if node.fully_expanded:
+            if node.is_fully_expanded:
                 node = self.get_best_move(node, 2)
             else:
                 return self.expand(node)
-
         return node
     
     def expand(self, node):
-        legal_moves = node.board.legal_moves()
-        for state in legal_moves:
+        states = node.board.legal_moves()
+        for state in states:
             if str(state.position) not in node.children:
-                new_node = Node(state, node)
+                new_node = TreeNode(state, node)
                 node.children[str(state.position)] = new_node
-                if len(legal_moves) == len(node.children):
+
+                if len(states) == len(node.children):
                     node.is_fully_expanded = True
                 return new_node
-            
+    
     def rollout(self, board):
         while not board.is_win():
             try:
                 board = random.choice(board.legal_moves())
             except:
                 return 0
+            
         if board.player_2 == 'x': return 1
         elif board.player_2 == 'o': return -1
-
+                
     def backpropagate(self, node, score):
         while node is not None:
             node.visits += 1
             node.score += score
             node = node.parent
-
+    
     def get_best_move(self, node, exploration_constant):
         best_score = float('-inf')
         best_moves = []
+
         for child_node in node.children.values():
             if child_node.board.player_2 == 'x': current_player = 1
             elif child_node.board.player_2 == 'o': current_player = -1
-            exploitation = current_player* child_node.score / child_node.visits
-            exploration = exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))
-            move_score = exploitation + exploration
-
+            move_score = current_player * child_node.score / child_node.visits + exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))                                        
             if move_score > best_score:
                 best_score = move_score
                 best_moves = [child_node]
-
             elif move_score == best_score:
                 best_moves.append(child_node)
-
         return random.choice(best_moves)
-    
-                                         
 
 
 
-        
 
 
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
