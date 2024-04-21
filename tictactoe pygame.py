@@ -102,6 +102,12 @@ class TicTacToe():
                     best_move = mcts.search(self, MAX_ITER)
                     try:
                         self = best_move.board
+                        if self.is_win():
+                            self.end_game_screen(screen, font, button_font, "Player '%s' has won!" % self.player_2)
+                            return
+                        elif self.is_draw():
+                            self.end_game_screen(screen, font, button_font, "Game is drawn!")
+                            return
                     except:
                         pass
 
