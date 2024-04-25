@@ -77,31 +77,3 @@ class MCTS():
             elif move_score == best_score:
                 best_moves.append(child_node)
         return random.choice(best_moves)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

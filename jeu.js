@@ -8,6 +8,8 @@ const message = document.querySelector('.content');
 const overlay = document.getElementById('overlay');
 const close = document.getElementById('close');
 
+const mcts = document.querySelector('.mcts');
+
 const winCombinaisons = [
     [0,1,2],
     [3,4,5],
@@ -48,10 +50,7 @@ for (let i = 0; i < 9; i++) {
                 checkWin(player1);
                 checkturn();
             } else {
-                addSymbol(player2, i);
-                turn = true;
-                checkWin(player2);
-                checkturn();
+                computerMove();
             }
         }else{
             alert('Utilisez une autre case !');
@@ -59,6 +58,16 @@ for (let i = 0; i < 9; i++) {
     });
 }
 
+function computerMove() {
+    if (!winner) {
+        let bestMoveNode = mcts.search(this.root.board); // Appel de la recherche MCTS
+        let bestMove = bestMoveNode.board.lastMove; // Récupération du meilleur coup
+        addSymbol(player2, bestMove); // Ajout du symbole de la machine sur la meilleure case
+        turn = true;
+        checkWin(player2); // Vérification de la victoire de la machine
+        checkturn();
+    }
+}
 
 function addSymbol(player, i){
     cells[i].innerHTML = player.symbol;

@@ -109,14 +109,3 @@ class TicTacToe():
 if __name__ == '__main__':
     board = TicTacToe()
     board.game_loop()
-        
-        
-        
-    
-    
-    
-    
-    
-    
-    
-    
