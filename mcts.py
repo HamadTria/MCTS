@@ -50,8 +50,9 @@ class MCTS():
                 board = random.choice(board.legal_moves())
             except:
                 return 0
-        if board.player_2 == 'x': return 1
-        elif board.player_2 == 'o': return -1
+        if board.player_2 == 'x': 
+            return 1
+        return -1
                 
     def backpropagate(self, node, score):
         while node is not None:
