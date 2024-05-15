@@ -3,7 +3,7 @@ import sys
 from copy import deepcopy
 from mcts import *
 
-MAX_ITER = 2
+MAX_ITER = 1000
 SCREEN_WIDTH = 300
 SCREEN_HEIGHT = 300
 LINE_COLOR = (0, 0, 0)

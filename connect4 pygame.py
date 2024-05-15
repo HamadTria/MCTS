@@ -25,8 +25,10 @@ class MCTS():
             node = self.select(self.root)
             score = self.rollout(node.board)
             self.backpropagate(node, score)
-        for child in self.root.children:
-            print(child.score, child.visits)
+        print("Scores for children of root:")
+        for child_node in self.root.children.values():
+            print(f"Score: {child_node.score}, Visits: {child_node.visits}")
+            print(child_node.board.board)
         return self.get_best_move(self.root, 0)
 
     def select(self, node):
@@ -40,9 +42,9 @@ class MCTS():
     def expand(self, node):
         states = node.board.legal_moves()
         for state in states:
-            if str(state) not in node.children:
+            if str(state.board) not in node.children:
                 new_node = Node(state, node)
-                node.children[str(state)] = new_node
+                node.children[str(state.board)] = new_node
 
                 if len(states) == len(node.children):
                     node.is_fully_expanded = True
