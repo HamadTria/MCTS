@@ -50,7 +50,7 @@ class MCTS():
                 board = random.choice(board.legal_moves())
             except:
                 return 0
-        if board.player_2 == 'x': 
+        if board.player_2 == 'HUMAN': 
             return 1
         return -1
                 
@@ -65,8 +65,8 @@ class MCTS():
         best_moves = []
 
         for child_node in node.children.values():
-            if child_node.board.player_2 == 'x': current_player = 1
-            elif child_node.board.player_2 == 'o': current_player = -1
+            if child_node.board.player_2 == 'HUMAN': current_player = 1
+            elif child_node.board.player_2 == 'AI': current_player = -1
 
             exploration = exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))   
             exploitation = current_player * child_node.score / child_node.visits                                  
@@ -78,31 +78,3 @@ class MCTS():
             elif move_score == best_score:
                 best_moves.append(child_node)
         return random.choice(best_moves)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

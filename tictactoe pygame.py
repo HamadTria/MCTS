@@ -3,13 +3,13 @@ import sys
 from copy import deepcopy
 from mcts import *
 
-MAX_ITER = 1000
+MAX_ITER = 2
 SCREEN_WIDTH = 300
 SCREEN_HEIGHT = 300
 LINE_COLOR = (0, 0, 0)
 BG_COLOR = (255, 255, 255)
-PLAYER_X_COLOR = (255, 0, 0)
-PLAYER_O_COLOR = (0, 0, 255)
+PLAYER_HUMAN_COLOR = (255, 0, 0)
+PLAYER_AI_COLOR = (0, 0, 255)
 FONT_COLOR = (0, 0, 0)
 FONT_SIZE = 50
 BUTTON_COLOR = (100, 100, 100)
@@ -20,8 +20,8 @@ BUTTON_HEIGHT = 50
 
 class TicTacToe():
     def __init__(self, board=None):
-        self.player_1 = 'x'
-        self.player_2 = 'o'
+        self.player_1 = 'HUMAN'
+        self.player_2 = 'AI'
         self.empty_square = '_'
         self.position = {}
         self.init_board()
@@ -93,7 +93,7 @@ class TicTacToe():
 
                     self = self.make_move(move)
                     if self.is_win():
-                        self.end_game_screen(screen, font, button_font, "Player '%s' has won!" % self.player_2)
+                        self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                         return
                     elif self.is_draw():
                         self.end_game_screen(screen, font, button_font, "Game is drawn!")
@@ -103,7 +103,7 @@ class TicTacToe():
                     try:
                         self = best_move.board
                         if self.is_win():
-                            self.end_game_screen(screen, font, button_font, "Player '%s' has won!" % self.player_2)
+                            self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                             return
                         elif self.is_draw():
                             self.end_game_screen(screen, font, button_font, "Game is drawn!")
@@ -127,10 +127,10 @@ class TicTacToe():
             x = col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2
             y = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 2
 
-            if symbol == 'x':
-                text = font.render(symbol, True, PLAYER_X_COLOR)
-            elif symbol == 'o':
-                text = font.render(symbol, True, PLAYER_O_COLOR)
+            if symbol == 'HUMAN':
+                text = font.render('x', True, PLAYER_HUMAN_COLOR)
+            elif symbol == 'AI':
+                text = font.render('o', True, PLAYER_AI_COLOR)
             else:
                 continue
 
