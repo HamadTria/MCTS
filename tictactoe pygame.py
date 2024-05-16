@@ -1,9 +1,10 @@
 import pygame
 import sys
 from copy import deepcopy
+import time
 from mcts import *
 
-MAX_ITER = 1000
+MAX_ITER = 500
 SCREEN_WIDTH = 300
 SCREEN_HEIGHT = 300
 LINE_COLOR = (0, 0, 0)
@@ -17,6 +18,7 @@ BUTTON_FONT_COLOR = (255, 255, 255)
 BUTTON_FONT_SIZE = 20
 BUTTON_WIDTH = 100
 BUTTON_HEIGHT = 50
+LINE_COLOR = (0, 0, 0)
 
 class TicTacToe():
     def __init__(self, board=None):
@@ -93,6 +95,14 @@ class TicTacToe():
 
                     self = self.make_move(move)
                     if self.is_win():
+                        winning_combination = self.get_winning_combination()
+                        screen.fill(BG_COLOR)
+                        self.draw_board(screen, font)
+                        pygame.display.flip()
+                        clock.tick(30)
+
+                        self.draw_connecting_line(screen, winning_combination) 
+                        time.sleep(1)                    
                         self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                         return
                     elif self.is_draw():
@@ -100,9 +110,21 @@ class TicTacToe():
                         return
 
                     best_move = mcts.search(self, MAX_ITER)
+                    screen.fill(BG_COLOR)
+                    self.draw_board(screen, font)
+                    pygame.display.flip()
+                    clock.tick(30)
+
                     try:
                         self = best_move.board
                         if self.is_win():
+                            winning_combination = self.get_winning_combination()
+                            screen.fill(BG_COLOR)
+                            self.draw_board(screen, font)
+                            pygame.display.flip()
+                            clock.tick(30)
+                            self.draw_connecting_line(screen, winning_combination) 
+                            time.sleep(1)  
                             self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                             return
                         elif self.is_draw():
@@ -171,6 +193,29 @@ class TicTacToe():
                     elif exit_button_rect.collidepoint(event.pos):
                         pygame.quit()
                         sys.exit()
+
+    def get_winning_combination(self):
+        for i in range(0, 9, 3):
+            if self.position[i] == self.position[i+1] == self.position[i+2] == self.player_2:
+                return [i, i+1, i+2]
+        for i in range(3):
+            if self.position[i] == self.position[i+3] == self.position[i+6] == self.player_2:
+                return [i, i+3, i+6]
+        if self.position[0] == self.position[4] == self.position[8] == self.player_2:
+            return [0, 4, 8]
+        if self.position[2] == self.position[4] == self.position[6] == self.player_2:
+            return [2, 4, 6]
+        return None
+    
+    def draw_connecting_line(self, screen, winning_combination):
+        start = winning_combination[0]
+        end = winning_combination[2]
+        start_x = (start % 3) * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2
+        start_y = (start // 3) * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 2
+        end_x = (end % 3) * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2
+        end_y = (end // 3) * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 2
+        pygame.draw.line(screen, LINE_COLOR, (start_x, start_y), (end_x, end_y), 5)
+        pygame.display.flip()
 
 if __name__ == '__main__':
     board = TicTacToe()

@@ -1,91 +1,10 @@
-import math
-import random
 import pygame
 import sys
 from copy import deepcopy
+import time
+from mcts import *
 
-class Node():
-    def __init__(self, board, parent):
-        self.board = board
-        if self.board.is_win() or self.board.is_draw():
-            self.is_terminal = True
-        else:
-            self.is_terminal = False
-        self.is_fully_expanded = self.is_terminal
-        self.parent = parent
-        self.visits = 0
-        self.score = 0
-        self.children = {}
-
-class MCTS():
-    def search(self, initial_state, max_iterations=1000):
-        self.root = Node(initial_state, None)
-
-        for _ in range(max_iterations):
-            node = self.select(self.root)
-            score = self.rollout(node.board)
-            self.backpropagate(node, score)
-        print("Scores for children of root:")
-        for child_node in self.root.children.values():
-            print(f"Score: {child_node.score}, Visits: {child_node.visits}")
-            print(child_node.board.board)
-        return self.get_best_move(self.root, 0)
-
-    def select(self, node):
-        while not node.is_terminal:
-            if node.is_fully_expanded:
-                node = self.get_best_move(node, 2)
-            else:
-                return self.expand(node)
-        return node
-
-    def expand(self, node):
-        states = node.board.legal_moves()
-        for state in states:
-            if str(state.board) not in node.children:
-                new_node = Node(state, node)
-                node.children[str(state.board)] = new_node
-
-                if len(states) == len(node.children):
-                    node.is_fully_expanded = True
-                return new_node
-
-    def rollout(self, board):
-        while not board.is_win():
-            try:
-                board = random.choice(board.legal_moves())
-            except:
-                return 0
-        if board.player_2 == 'HUMAN': 
-            return 1
-        return -1
-
-    def backpropagate(self, node, score):
-        while node is not None:
-            node.visits += 1
-            node.score += score
-            node = node.parent
-
-    def get_best_move(self, node, exploration_constant):
-        best_score = float('-inf')
-        best_moves = []
-
-        for child_node in node.children.values():
-            if child_node.board.player_2 == 'HUMAN': current_player = 1
-            elif child_node.board.player_2 == 'AI': current_player = -1
-
-            exploration = exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))
-            exploitation = current_player * child_node.score / child_node.visits
-            move_score = exploitation + exploration
-
-            if move_score > best_score:
-                best_score = move_score
-                best_moves = [child_node]
-            elif move_score == best_score:
-                best_moves.append(child_node)
-        return random.choice(best_moves)
-
-MAX_ITER = 1000
+MAX_ITER = 500
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 LINE_COLOR = (0, 0, 0)
@@ -105,28 +24,28 @@ class ConnectFour():
         self.player_1 = 'HUMAN'
         self.player_2 = 'AI'
         self.empty_square = '_'
-        self.board = [['_' for _ in range(7)] for _ in range(6)]
+        self.position = [['_' for _ in range(7)] for _ in range(6)]
         if board is not None:
             self.__dict__ = deepcopy(board.__dict__)
 
     def make_move(self, col):
         board = ConnectFour(self)
         for row in range(5, -1, -1):
-            if board.board[row][col] == '_':
-                board.board[row][col] = self.player_1
+            if board.position[row][col] == '_':
+                board.position[row][col] = self.player_1
                 (board.player_1, board.player_2) = (board.player_2, board.player_1)
                 break
         return board
 
     def is_draw(self):
-        for row in self.board:
+        for row in self.position:
             if '_' in row:
                 return False
         return True
 
     def is_win(self):
         # horizontal
-        for row in self.board:
+        for row in self.position:
             for col in range(4):
                 if row[col] == row[col+1] == row[col+2] == row[col+3] == self.player_2:
                     return True
@@ -134,27 +53,26 @@ class ConnectFour():
         # vertical
         for col in range(7):
             for row in range(3):
-                if self.board[row][col] == self.board[row+1][col] == self.board[row+2][col] == self.board[row+3][col] == self.player_2:
+                if self.position[row][col] == self.position[row+1][col] == self.position[row+2][col] == self.position[row+3][col] == self.player_2:
                     return True
 
         # diagonal (top-left to bottom-right)
         for col in range(4):
             for row in range(3):
-                if self.board[row][col] == self.board[row+1][col+1] == self.board[row+2][col+2] == self.board[row+3][col+3] == self.player_2:
+                if self.position[row][col] == self.position[row+1][col+1] == self.position[row+2][col+2] == self.position[row+3][col+3] == self.player_2:
                     return True
 
         # diagonal (top-right to bottom-left)
         for col in range(4, 7):
             for row in range(3, -1, -1):
-                if self.board[row][col] == self.board[row-1][col-1] == self.board[row-2][col-2] == self.board[row-3][col-3] == self.player_2:
+                if self.position[row][col] == self.position[row-1][col-1] == self.position[row-2][col-2] == self.position[row-3][col-3] == self.player_2:
                     return True
-
         return False
 
     def legal_moves(self):
         actions = []
         for col in range(7):
-            if self.board[0][col] == '_':
+            if self.position[0][col] == '_':
                 actions.append(self.make_move(col))        
         
         # random.shuffle(actions)
@@ -179,7 +97,7 @@ class ConnectFour():
                     pos = pygame.mouse.get_pos()
                     col = pos[0] // (SCREEN_WIDTH // 7)
 
-                    if self.board[0][col] != '_':
+                    if self.position[0][col] != '_':
                         continue
 
                     self = self.make_move(col)
@@ -190,6 +108,13 @@ class ConnectFour():
                     clock.tick(30)
 
                     if self.is_win():
+                        winning_combination = self.get_winning_combination()
+                        screen.fill(BG_COLOR)
+                        self.draw_board(screen, font)
+                        pygame.display.flip()
+                        clock.tick(30)
+                        self.draw_connecting_line(screen, winning_combination) 
+                        time.sleep(1)                    
                         self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                         return
                     elif self.is_draw():
@@ -200,6 +125,13 @@ class ConnectFour():
                     try:
                         self = best_move.board
                         if self.is_win():
+                            winning_combination = self.get_winning_combination()
+                            screen.fill(BG_COLOR)
+                            self.draw_board(screen, font)
+                            pygame.display.flip()
+                            clock.tick(30)
+                            self.draw_connecting_line(screen, winning_combination) 
+                            time.sleep(1)  
                             self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                             return
                         elif self.is_draw():
@@ -223,9 +155,9 @@ class ConnectFour():
                 x = col * (SCREEN_WIDTH // 7) + (SCREEN_WIDTH // 7) // 2
                 y = row * (SCREEN_HEIGHT // 6) + (SCREEN_HEIGHT // 6) // 2
 
-                if self.board[row][col] == 'HUMAN':
+                if self.position[row][col] == 'HUMAN':
                     text = font.render('o', True, PLAYER_HUMAN_COLOR)
-                elif self.board[row][col] == 'AI':
+                elif self.position[row][col] == 'AI':
                     text = font.render('o', True, PLAYER_AI_COLOR)
                 else:
                     continue
@@ -267,6 +199,41 @@ class ConnectFour():
                     elif exit_button_rect.collidepoint(event.pos):
                         pygame.quit()
                         sys.exit()
+    
+    def get_winning_combination(self):
+        # horizontal
+        for row in range(6):
+            for col in range(4):
+                if self.position[row][col] == self.position[row][col+1] == self.position[row][col+2] == self.position[row][col+3] == self.player_2:
+                    return [(row, col), (row, col+1), (row, col+2), (row, col+3)]
+
+        # vertical
+        for col in range(7):
+            for row in range(3):
+                if self.position[row][col] == self.position[row+1][col] == self.position[row+2][col] == self.position[row+3][col] == self.player_2:
+                    return [(row, col), (row+1, col), (row+2, col), (row+3, col)]
+
+        # diagonal (top-left to bottom-right)
+        for col in range(4):
+            for row in range(3):
+                if self.position[row][col] == self.position[row+1][col+1] == self.position[row+2][col+2] == self.position[row+3][col+3] == self.player_2:
+                    return [(row, col), (row+1, col+1), (row+2, col+2), (row+3, col+3)]
+
+        # diagonal (top-right to bottom-left)
+        for col in range(4, 7):
+            for row in range(3, -1, -1):
+                if self.position[row][col] == self.position[row-1][col-1] == self.position[row-2][col-2] == self.position[row-3][col-3] == self.player_2:
+                    return [(row, col), (row-1, col-1), (row-2, col-2), (row-3, col-3)]
+
+    def draw_connecting_line(self, screen, winning_combination):
+        start_row, start_col = winning_combination[0]
+        end_row, end_col = winning_combination[-1]
+        start_x = start_col * (SCREEN_WIDTH // 7) + (SCREEN_WIDTH // 7) // 2
+        start_y = start_row * (SCREEN_HEIGHT // 6) + (SCREEN_HEIGHT // 6) // 2
+        end_x = end_col * (SCREEN_WIDTH // 7) + (SCREEN_WIDTH // 7) // 2
+        end_y = end_row * (SCREEN_HEIGHT // 6) + (SCREEN_HEIGHT // 6) // 2
+        pygame.draw.line(screen, LINE_COLOR, (start_x, start_y), (end_x, end_y), 5)
+        pygame.display.flip()
 
 if __name__ == '__main__':
     board = ConnectFour()
