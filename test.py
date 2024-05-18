@@ -7,7 +7,7 @@ from mcts import *
 MAX_ITER = 500
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
-OFFSET = 600
+OFFSET = 400
 LINE_COLOR = (0, 0, 0)
 BG_COLOR = (255, 255, 255)
 PLAYER_HUMAN_COLOR = (255, 0, 0)
@@ -118,11 +118,17 @@ class TicTacToe():
                         first_child_score = list_children[0].score
                         best_move_visits = best_move.visits
                         first_child_visits = list_children[0].visits
+
+                        self.draw_small_board(screen, SCREEN_WIDTH + 10, 10, font)
+                        self.draw_scores(screen, SCREEN_WIDTH + 10, SCREEN_HEIGHT // 3 + 10, font, best_move_score, first_child_score, best_move_visits, first_child_visits)
+
+                        pygame.display.flip()
                         
                         self = best_move.board
 
                         screen.fill(BG_COLOR)
                         self.draw_board(screen, font)
+                        self.draw_child_nodes(screen, font, children, OFFSET, 0, 0.5)
                         pygame.display.flip()
                         clock.tick(30)
 
@@ -142,6 +148,26 @@ class TicTacToe():
             self.draw_board(screen, font)
             pygame.display.flip()
             clock.tick(30)
+
+    def draw_child_nodes(self, screen, font, children, offset_x, offset_y, scale_factor):
+        board_width = SCREEN_WIDTH // 3 * 3
+        board_height = SCREEN_HEIGHT // 3 * 3
+
+        for i, (_, child_node) in enumerate(children.items()):
+            child_offset_x = offset_x + (i % 3) * (board_width // 3) * scale_factor
+            child_offset_y = offset_y + (i // 3) * (board_height // 3) * scale_factor
+
+            self.draw_board(screen, font, child_node, child_offset_x, child_offset_y, scale_factor)
+
+            score_text = font.render(str(child_node.score), True, FONT_COLOR)
+            visits_text = font.render(str(child_node.visits), True, FONT_COLOR)
+
+            score_rect = score_text.get_rect(center=(child_offset_x + (board_width // 3) * scale_factor, child_offset_y - board_height // 10 * scale_factor))
+            visits_rect = visits_text.get_rect(center=(child_offset_x + (board_width // 3) * scale_factor, child_offset_y + board_height // 8 * scale_factor))
+
+            screen.blit(score_text, score_rect)
+            screen.blit(visits_text, visits_rect)
+
 
     def draw_board(self, screen, font):
         for i in range(1, 3):
@@ -168,11 +194,11 @@ class TicTacToe():
     def end_game_screen(self, screen, font, button_font, message):
         screen.fill(BG_COLOR)
         text = font.render(message, True, FONT_COLOR)
-        text_rect = text.get_rect(center=((SCREEN_WIDTH + OFFSET) // 2, SCREEN_HEIGHT // 2 - FONT_SIZE))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - FONT_SIZE))
         screen.blit(text, text_rect)
 
-        play_again_button_rect = pygame.Rect(((SCREEN_WIDTH + OFFSET) // 2 - BUTTON_WIDTH // 2, SCREEN_HEIGHT // 2), (BUTTON_WIDTH, BUTTON_HEIGHT))
-        exit_button_rect = pygame.Rect(((SCREEN_WIDTH + OFFSET) // 2 - BUTTON_WIDTH // 2, SCREEN_HEIGHT // 2 + BUTTON_HEIGHT + 10), (BUTTON_WIDTH, BUTTON_HEIGHT))
+        play_again_button_rect = pygame.Rect((SCREEN_WIDTH // 2 - BUTTON_WIDTH // 2, SCREEN_HEIGHT // 2), (BUTTON_WIDTH, BUTTON_HEIGHT))
+        exit_button_rect = pygame.Rect((SCREEN_WIDTH // 2 - BUTTON_WIDTH // 2, SCREEN_HEIGHT // 2 + BUTTON_HEIGHT + 10), (BUTTON_WIDTH, BUTTON_HEIGHT))
 
         pygame.draw.rect(screen, BUTTON_COLOR, play_again_button_rect)
         pygame.draw.rect(screen, BUTTON_COLOR, exit_button_rect)
@@ -222,6 +248,41 @@ class TicTacToe():
         end_y = (end // 3) * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 2
         pygame.draw.line(screen, LINE_COLOR, (start_x, start_y), (end_x, end_y), 5)
         pygame.display.flip()
+
+    def draw_small_board(self, screen, x, y, font):
+        for i in range(1, 3):
+            pygame.draw.line(screen, LINE_COLOR, (x, y + i * SCREEN_HEIGHT // 9), (x + SCREEN_WIDTH // 3, y + i * SCREEN_HEIGHT // 9), 1)
+            pygame.draw.line(screen, LINE_COLOR, (x + i * SCREEN_WIDTH // 9, y), (x + i * SCREEN_WIDTH // 9, y + SCREEN_HEIGHT // 3), 1)
+
+        for pos, symbol in self.position.items():
+            col = pos % 3
+            row = pos // 3
+            x_small = x + col * (SCREEN_WIDTH // 9) + (SCREEN_WIDTH // 18)
+            y_small = y + row * (SCREEN_HEIGHT // 9) + (SCREEN_HEIGHT // 18)
+
+            if symbol == 'HUMAN':
+                text = font.render('x', True, PLAYER_HUMAN_COLOR)
+            elif symbol == 'AI':
+                text = font.render('o', True, PLAYER_AI_COLOR)
+            else:
+                continue
+
+            screen.blit(text, (x_small, y_small))
+
+    def draw_scores(self, screen, x, y, font, best_move_score, first_child_score, best_move_visits, first_child_visits):
+        score_text = font.render("Score: " + str(best_move_score), True, FONT_COLOR)
+        screen.blit(score_text, (x, y))
+
+        first_child_score_text = font.render("First Child Score: " + str(first_child_score), True, FONT_COLOR)
+        screen.blit(first_child_score_text, (x, y + 20))
+
+        visits_text = font.render("Visits: " + str(best_move_visits), True, FONT_COLOR)
+        screen.blit(visits_text, (x, y + 40))
+
+        first_child_visits_text = font.render("First Child Visits: " + str(first_child_visits), True, FONT_COLOR)
+        screen.blit(first_child_visits_text, (x, y + 60))
+
+
 
 if __name__ == '__main__':
     board = TicTacToe()

@@ -25,8 +25,7 @@ class MCTS():
 
         best_move = self.get_best_move(self.root, 0)
         children = self.root.children
-        for child in children:
-            print(children[child].board.position, children[child].score, children[child].visits)
+
         return best_move, children
     
     def select(self, node):
