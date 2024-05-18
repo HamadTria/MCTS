@@ -4,7 +4,7 @@ from copy import deepcopy
 import time
 from mcts import *
 
-MAX_ITER = 500
+MAX_ITER = 1000
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 LINE_COLOR = (0, 0, 0)
@@ -49,19 +49,16 @@ class ConnectFour():
             for col in range(4):
                 if row[col] == row[col+1] == row[col+2] == row[col+3] == self.player_2:
                     return True
-
         # vertical
         for col in range(7):
             for row in range(3):
                 if self.position[row][col] == self.position[row+1][col] == self.position[row+2][col] == self.position[row+3][col] == self.player_2:
                     return True
-
         # diagonal (top-left to bottom-right)
         for col in range(4):
             for row in range(3):
                 if self.position[row][col] == self.position[row+1][col+1] == self.position[row+2][col+2] == self.position[row+3][col+3] == self.player_2:
                     return True
-
         # diagonal (top-right to bottom-left)
         for col in range(4, 7):
             for row in range(3, -1, -1):
@@ -75,7 +72,6 @@ class ConnectFour():
             if self.position[0][col] == '_':
                 actions.append(self.make_move(col))        
         
-        # random.shuffle(actions)
         return actions
 
     def game_loop(self):
@@ -112,9 +108,8 @@ class ConnectFour():
                         screen.fill(BG_COLOR)
                         self.draw_board(screen, font)
                         pygame.display.flip()
-                        clock.tick(30)
                         self.draw_connecting_line(screen, winning_combination) 
-                        time.sleep(1)                    
+                        time.sleep(20)                    
                         self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                         return
                     elif self.is_draw():
@@ -131,7 +126,7 @@ class ConnectFour():
                             pygame.display.flip()
                             clock.tick(30)
                             self.draw_connecting_line(screen, winning_combination) 
-                            time.sleep(1)  
+                            time.sleep(20)  
                             self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                             return
                         elif self.is_draw():
@@ -156,9 +151,9 @@ class ConnectFour():
                 y = row * (SCREEN_HEIGHT // 6) + (SCREEN_HEIGHT // 6) // 2
 
                 if self.position[row][col] == 'HUMAN':
-                    text = font.render('o', True, PLAYER_HUMAN_COLOR)
+                    text = font.render('O', True, PLAYER_HUMAN_COLOR)
                 elif self.position[row][col] == 'AI':
-                    text = font.render('o', True, PLAYER_AI_COLOR)
+                    text = font.render('O', True, PLAYER_AI_COLOR)
                 else:
                     continue
 

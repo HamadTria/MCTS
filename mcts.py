@@ -23,7 +23,8 @@ class MCTS():
             score = self.rollout(node.board)
             self.backpropagate(node, score)
 
-        return self.get_best_move(self.root, 0)
+        best_move = self.get_best_move(self.root, 0)
+        return best_move
     
     def select(self, node):
         while not node.is_terminal:
