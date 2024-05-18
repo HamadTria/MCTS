@@ -7,6 +7,7 @@ from mcts import *
 MAX_ITER = 500
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
+OFFSET = 400
 LINE_COLOR = (0, 0, 0)
 BG_COLOR = (255, 255, 255)
 PLAYER_HUMAN_COLOR = (255, 0, 0)
@@ -70,7 +71,7 @@ class TicTacToe():
 
     def game_loop(self):
         pygame.init()
-        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        screen = pygame.display.set_mode((SCREEN_WIDTH + OFFSET, SCREEN_HEIGHT))
         pygame.display.set_caption("Tic Tac Toe")
         font = pygame.font.SysFont(None, FONT_SIZE)
         button_font = pygame.font.SysFont(None, BUTTON_FONT_SIZE)
@@ -93,13 +94,14 @@ class TicTacToe():
                         continue
 
                     self = self.make_move(move)
+                    
+                    screen.fill(BG_COLOR)
+                    self.draw_board(screen, font)
+                    pygame.display.flip()
+                    clock.tick(30)
+
                     if self.is_win():
                         winning_combination = self.get_winning_combination()
-                        screen.fill(BG_COLOR)
-                        self.draw_board(screen, font)
-                        pygame.display.flip()
-                        clock.tick(30)
-
                         self.draw_connecting_line(screen, winning_combination) 
                         time.sleep(1)                    
                         self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
@@ -108,20 +110,19 @@ class TicTacToe():
                         self.end_game_screen(screen, font, button_font, "Game is drawn!")
                         return
 
-                    best_move = mcts.search(self, MAX_ITER)
-                    screen.fill(BG_COLOR)
-                    self.draw_board(screen, font)
-                    pygame.display.flip()
-                    clock.tick(30)
-
                     try:
+                        best_move, children = mcts.search(self, MAX_ITER)
+                        list_children =  list((children.values()))
+                        
                         self = best_move.board
+
+                        screen.fill(BG_COLOR)
+                        self.draw_board(screen, font)
+                        pygame.display.flip()
+                        clock.tick(30)
+
                         if self.is_win():
                             winning_combination = self.get_winning_combination()
-                            screen.fill(BG_COLOR)
-                            self.draw_board(screen, font)
-                            pygame.display.flip()
-                            clock.tick(30)
                             self.draw_connecting_line(screen, winning_combination) 
                             time.sleep(1)  
                             self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
@@ -141,6 +142,7 @@ class TicTacToe():
         for i in range(1, 3):
             pygame.draw.line(screen, LINE_COLOR, (0, i * SCREEN_HEIGHT // 3), (SCREEN_WIDTH, i * SCREEN_HEIGHT // 3), 3)
             pygame.draw.line(screen, LINE_COLOR, (i * SCREEN_WIDTH // 3, 0), (i * SCREEN_WIDTH // 3, SCREEN_HEIGHT), 3)
+        pygame.draw.line(screen, LINE_COLOR, (3 * SCREEN_WIDTH // 3, 0), (3 * SCREEN_WIDTH // 3, SCREEN_HEIGHT), 3)
 
         for pos, symbol in self.position.items():
             col = pos % 3

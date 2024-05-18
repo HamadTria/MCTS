@@ -24,7 +24,10 @@ class MCTS():
             self.backpropagate(node, score)
 
         best_move = self.get_best_move(self.root, 0)
-        return best_move
+        children = self.root.children
+        for child in children:
+            print(children[child].board.position, children[child].score, children[child].visits)
+        return best_move, children
     
     def select(self, node):
         while not node.is_terminal:
