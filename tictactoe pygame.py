@@ -16,6 +16,7 @@ PLAYER_AI_COLOR = (0, 0, 255)
 CHILD_PLAYER_COLOR = (200, 200, 200)
 FONT_COLOR = (0, 0, 0)
 FONT_SIZE = 100
+SMALL_FONT_SIZE = 50
 BUTTON_COLOR = (100, 100, 100)
 BUTTON_FONT_COLOR = (255, 255, 255)
 BUTTON_FONT_SIZE = 20
@@ -74,9 +75,9 @@ class TicTacToe():
     def game_loop(self):
         pygame.init()
         screen = pygame.display.set_mode((SCREEN_WIDTH + OFFSET, SCREEN_HEIGHT))
-        screen.fill(BG_COLOR)
         pygame.display.set_caption("Tic Tac Toe")
         font = pygame.font.SysFont(None, FONT_SIZE)
+        small_font = pygame.font.SysFont(None, SMALL_FONT_SIZE)
         button_font = pygame.font.SysFont(None, BUTTON_FONT_SIZE)
         clock = pygame.time.Clock()
 
@@ -111,7 +112,7 @@ class TicTacToe():
                     if self.is_win():
                         winning_combination = self.get_winning_combination()
                         self.draw_connecting_line(screen, winning_combination) 
-                        time.sleep(1)                    
+                        time.sleep(3)                    
                         self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                         return
                     elif self.is_draw():
@@ -126,14 +127,14 @@ class TicTacToe():
 
                     try:
                         self = best_move.board
-                        self.draw_board(screen, font, list_children)
+                        self.draw_board(screen, font, list_children, small_font)
                         pygame.display.flip()
                         clock.tick(30)
 
                         if self.is_win():
                             winning_combination = self.get_winning_combination()
                             self.draw_connecting_line(screen, winning_combination) 
-                            time.sleep(1)  
+                            time.sleep(3)  
                             self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                             return
                         elif self.is_draw():
@@ -142,7 +143,8 @@ class TicTacToe():
                     except:
                         pass
 
-    def draw_board(self, screen, font, children=None):
+    def draw_board(self, screen, font, children=None, small_font=None):
+        screen.fill(BG_COLOR)
         for i in range(1, 3):
             # main board
             pygame.draw.line(screen, LINE_COLOR, (0, i * SCREEN_HEIGHT // 3), (SCREEN_WIDTH, i * SCREEN_HEIGHT // 3), 3)
@@ -175,6 +177,24 @@ class TicTacToe():
             text_child_rect = text_child.get_rect(center=(x_child, y_child))
             screen.blit(text, text_rect)
             screen.blit(text_child, text_child_rect)
+
+        if children is not None:
+            for child in children:
+                for child_pos, child_symbol in child.board.position.items():
+                    for pos, symbol in self.position.items():
+                        if child_pos == pos and child_symbol != symbol:
+                            col = pos % 3
+                            row = pos // 3
+                            x = (col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2 + OFFSET)
+                            y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3
+                            y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3 * 2
+                            score = small_font.render(f'UCT: {child.score}', True, FONT_COLOR)
+                            visits = small_font.render(f'visits: {child.visits}', True, FONT_COLOR)
+                            score_rect = score.get_rect(center=(x, y_1))
+                            visits_rect = visits.get_rect(center=(x, y_2))
+                            screen.blit(score, score_rect)
+                            screen.blit(visits, visits_rect)
+                            break
 
     def end_game_screen(self, screen, font, button_font, message):
         screen.fill(BG_COLOR)
