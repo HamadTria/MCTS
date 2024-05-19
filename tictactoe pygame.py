@@ -86,6 +86,8 @@ class TicTacToe():
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
+                    if pos[0] > SCREEN_WIDTH:
+                        continue
                     col = pos[0] // (SCREEN_WIDTH // 3)
                     row = pos[1] // (SCREEN_HEIGHT // 3)
                     move = row * 3 + col
