@@ -9,9 +9,11 @@ SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 OFFSET = 600
 LINE_COLOR = (0, 0, 0)
+CHILD_SEPLINE_COLOR = (200, 200, 200)
 BG_COLOR = (255, 255, 255)
 PLAYER_HUMAN_COLOR = (255, 0, 0)
 PLAYER_AI_COLOR = (0, 0, 255)
+CHILD_PLAYER_COLOR = (200, 200, 200)
 FONT_COLOR = (0, 0, 0)
 FONT_SIZE = 100
 BUTTON_COLOR = (100, 100, 100)
@@ -72,10 +74,15 @@ class TicTacToe():
     def game_loop(self):
         pygame.init()
         screen = pygame.display.set_mode((SCREEN_WIDTH + OFFSET, SCREEN_HEIGHT))
+        screen.fill(BG_COLOR)
         pygame.display.set_caption("Tic Tac Toe")
         font = pygame.font.SysFont(None, FONT_SIZE)
         button_font = pygame.font.SysFont(None, BUTTON_FONT_SIZE)
         clock = pygame.time.Clock()
+
+        self.draw_board(screen, font)
+        pygame.display.flip()
+        clock.tick(30)
 
         mcts = MCTS()
         while True:
@@ -97,7 +104,6 @@ class TicTacToe():
 
                     self = self.make_move(move)
                     
-                    screen.fill(BG_COLOR)
                     self.draw_board(screen, font)
                     pygame.display.flip()
                     clock.tick(30)
@@ -111,20 +117,16 @@ class TicTacToe():
                     elif self.is_draw():
                         self.end_game_screen(screen, font, button_font, "Game is drawn!")
                         return
+                    
+                    best_move, children = mcts.search(self, MAX_ITER)
+                    list_children =  list((children.values()))
+
+                    pygame.display.flip()
+                    clock.tick(30)
 
                     try:
-                        best_move, children = mcts.search(self, MAX_ITER)
-                        list_children =  list((children.values()))
-
-                        best_move_score = best_move.score
-                        first_child_score = list_children[0].score
-                        best_move_visits = best_move.visits
-                        first_child_visits = list_children[0].visits
-                        
                         self = best_move.board
-
-                        screen.fill(BG_COLOR)
-                        self.draw_board(screen, font)
+                        self.draw_board(screen, font, list_children)
                         pygame.display.flip()
                         clock.tick(30)
 
@@ -140,16 +142,16 @@ class TicTacToe():
                     except:
                         pass
 
-            screen.fill(BG_COLOR)
-            self.draw_board(screen, font)
-            pygame.display.flip()
-            clock.tick(30)
-
-    def draw_board(self, screen, font):
+    def draw_board(self, screen, font, children=None):
         for i in range(1, 3):
+            # main board
             pygame.draw.line(screen, LINE_COLOR, (0, i * SCREEN_HEIGHT // 3), (SCREEN_WIDTH, i * SCREEN_HEIGHT // 3), 3)
             pygame.draw.line(screen, LINE_COLOR, (i * SCREEN_WIDTH // 3, 0), (i * SCREEN_WIDTH // 3, SCREEN_HEIGHT), 3)
-        pygame.draw.line(screen, LINE_COLOR, (3 * SCREEN_WIDTH // 3, 0), (3 * SCREEN_WIDTH // 3, SCREEN_HEIGHT), 3)
+            # side board
+            pygame.draw.line(screen, CHILD_SEPLINE_COLOR, (SCREEN_WIDTH, i * SCREEN_HEIGHT // 3), (SCREEN_WIDTH + OFFSET, i * SCREEN_HEIGHT // 3), 3)
+            pygame.draw.line(screen, CHILD_SEPLINE_COLOR, ((i * SCREEN_WIDTH // 3) + OFFSET, 0), ((i * SCREEN_WIDTH // 3) + OFFSET, SCREEN_HEIGHT), 3)
+
+        pygame.draw.line(screen, LINE_COLOR, (3 * SCREEN_WIDTH // 3, 0), (3 * SCREEN_WIDTH // 3, SCREEN_HEIGHT), 10)
 
         for pos, symbol in self.position.items():
             col = pos % 3
@@ -157,15 +159,22 @@ class TicTacToe():
             x = col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2
             y = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 2
 
+            x_child = col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2 + OFFSET
+            y_child = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 2
+
             if symbol == 'HUMAN':
                 text = font.render('x', True, PLAYER_HUMAN_COLOR)
+                text_child = font.render('x', True, CHILD_PLAYER_COLOR)
             elif symbol == 'AI':
                 text = font.render('o', True, PLAYER_AI_COLOR)
+                text_child = font.render('o', True, CHILD_PLAYER_COLOR)
+
             else:
                 continue
-
             text_rect = text.get_rect(center=(x, y))
+            text_child_rect = text_child.get_rect(center=(x_child, y_child))
             screen.blit(text, text_rect)
+            screen.blit(text_child, text_child_rect)
 
     def end_game_screen(self, screen, font, button_font, message):
         screen.fill(BG_COLOR)
