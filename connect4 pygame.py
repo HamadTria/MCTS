@@ -116,7 +116,7 @@ class ConnectFour():
                         self.end_game_screen(screen, font, button_font, "Game is drawn!")
                         return
 
-                    best_move = mcts.search(self, MAX_ITER)
+                    best_move, _ = mcts.search(self, MAX_ITER)
                     try:
                         self = best_move.board
                         if self.is_win():

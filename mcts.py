@@ -12,6 +12,7 @@ class Node():
         self.parent = parent
         self.visits = 0
         self.score = 0
+        self.uct = 0
         self.children = {}
 
 class MCTS():
@@ -74,6 +75,7 @@ class MCTS():
             exploration = exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))   
             exploitation = current_player * child_node.score / child_node.visits                                  
             move_score = exploitation + exploration
+            child_node.uct = move_score
             
             if move_score > best_score:
                 best_score = move_score

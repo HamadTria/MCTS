@@ -112,7 +112,7 @@ class TicTacToe():
                     if self.is_win():
                         winning_combination = self.get_winning_combination()
                         self.draw_connecting_line(screen, winning_combination) 
-                        time.sleep(3)                    
+                        time.sleep(4)                    
                         self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                         return
                     elif self.is_draw():
@@ -134,7 +134,7 @@ class TicTacToe():
                         if self.is_win():
                             winning_combination = self.get_winning_combination()
                             self.draw_connecting_line(screen, winning_combination) 
-                            time.sleep(3)  
+                            time.sleep(4)  
                             self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                             return
                         elif self.is_draw():
@@ -178,23 +178,63 @@ class TicTacToe():
             screen.blit(text, text_rect)
             screen.blit(text_child, text_child_rect)
 
+        max_visits = 0
+        max_score = 0
         if children is not None:
             for child in children:
+                similarities = 0
                 for child_pos, child_symbol in child.board.position.items():
                     for pos, symbol in self.position.items():
-                        if child_pos == pos and child_symbol != symbol:
+                        if child_pos == pos and child_symbol == symbol:
+                            similarities += 1
+                            if similarities == 9:
+                                best_child = child
+                                break
+                        if child_pos == pos and child_symbol != symbol and symbol == '_':
+                            #print(f'{child.board.position} visits: {child.visits} score: {child.score}')
+                            print(child_pos, pos)
                             col = pos % 3
                             row = pos // 3
                             x = (col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2 + OFFSET)
-                            y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3
-                            y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3 * 2
-                            score = small_font.render(f'UCT: {child.score}', True, FONT_COLOR)
+                            y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4
+                            y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4 * 2
+                            y_3 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4 * 3
+                            score = small_font.render(f'score: {child.score}', True, FONT_COLOR)
                             visits = small_font.render(f'visits: {child.visits}', True, FONT_COLOR)
+                            uct = small_font.render(f'UCT: {child.uct:.2f}', True, FONT_COLOR)
                             score_rect = score.get_rect(center=(x, y_1))
                             visits_rect = visits.get_rect(center=(x, y_2))
+                            uct_rect = uct.get_rect(center=(x, y_3))
                             screen.blit(score, score_rect)
                             screen.blit(visits, visits_rect)
+                            screen.blit(uct, uct_rect)
                             break
+
+            found = False
+            for child in children:
+                if child != best_child and not found:
+                    found = True
+                    for child_pos, child_symbol in child.board.position.items():
+                        for best_child_pos, best_child_symbol in best_child.board.position.items():
+                            if best_child_pos == child_pos and child_symbol != best_child_symbol and best_child_symbol == 'AI':
+                                col = best_child_pos % 3
+                                row = best_child_pos // 3
+                                x = (col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2 + OFFSET)
+                                y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4
+                                y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4 * 2
+                                y_3 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4 * 3
+                                score = small_font.render(f'score: {best_child.score}', True, (255, 0, 0))
+                                visits = small_font.render(f'visits: {best_child.visits}', True, (255, 0, 0))
+                                uct = small_font.render(f'UCT: {best_child.uct:.2f}', True, (255, 0, 0))
+                                score_rect = score.get_rect(center=(x, y_1))
+                                visits_rect = visits.get_rect(center=(x, y_2))
+                                uct_rect = uct.get_rect(center=(x, y_3))
+                                screen.blit(score, score_rect)
+                                screen.blit(visits, visits_rect)
+                                screen.blit(uct, uct_rect)
+                                break
+
+
 
     def end_game_screen(self, screen, font, button_font, message):
         screen.fill(BG_COLOR)
