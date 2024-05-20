@@ -4,7 +4,7 @@ from copy import deepcopy
 import time
 from mcts import *
 
-MAX_ITER = 1
+MAX_ITER = 1000
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 LINE_COLOR = (0, 0, 0)
