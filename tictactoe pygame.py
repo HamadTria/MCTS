@@ -113,7 +113,7 @@ class TicTacToe():
                     if self.is_win():
                         winning_combination = self.get_winning_combination()
                         self.draw_connecting_line(screen, winning_combination) 
-                        time.sleep(4)                    
+                        time.sleep(3)                    
                         self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                         return
                     elif self.is_draw():
@@ -135,7 +135,7 @@ class TicTacToe():
                         if self.is_win():
                             winning_combination = self.get_winning_combination()
                             self.draw_connecting_line(screen, winning_combination) 
-                            time.sleep(4)  
+                            time.sleep(3)  
                             self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                             return
                         elif self.is_draw():
@@ -202,7 +202,6 @@ class TicTacToe():
                             screen.blit(visits, visits_rect)
                             screen.blit(uct, uct_rect)
                             break
-
             found = False
             for child in children:
                 if child != best_child and not found:
@@ -213,12 +212,16 @@ class TicTacToe():
                                 col = best_child_pos % 3
                                 row = best_child_pos // 3
                                 x = (col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2 + OFFSET)
+                                y = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 2
                                 y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3
                                 y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3 * 2
+                                text = font.render('o', True, (255, 255, 255))
                                 visits = small_font.render(f'visits: {best_child.visits}', True, BEST_CHILD_COLOR)
                                 uct = small_font.render(f'UCT: {best_child.uct:.2f}', True, BEST_CHILD_COLOR)
+                                text_rect = text.get_rect(center=(x, y))
                                 visits_rect = visits.get_rect(center=(x, y_1))
                                 uct_rect = uct.get_rect(center=(x, y_2))
+                                screen.blit(text, text_rect)
                                 screen.blit(visits, visits_rect)
                                 screen.blit(uct, uct_rect)
                                 break
