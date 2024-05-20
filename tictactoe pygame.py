@@ -193,16 +193,12 @@ class TicTacToe():
                             col = pos % 3
                             row = pos // 3
                             x = (col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2 + OFFSET)
-                            y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4
-                            y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4 * 2
-                            y_3 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4 * 3
-                            score = small_font.render(f'score: {child.score}', True, FONT_COLOR)
+                            y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3
+                            y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3 * 2
                             visits = small_font.render(f'visits: {child.visits}', True, FONT_COLOR)
                             uct = small_font.render(f'UCT: {child.uct:.2f}', True, FONT_COLOR)
-                            score_rect = score.get_rect(center=(x, y_1))
-                            visits_rect = visits.get_rect(center=(x, y_2))
-                            uct_rect = uct.get_rect(center=(x, y_3))
-                            screen.blit(score, score_rect)
+                            visits_rect = visits.get_rect(center=(x, y_1))
+                            uct_rect = uct.get_rect(center=(x, y_2))
                             screen.blit(visits, visits_rect)
                             screen.blit(uct, uct_rect)
                             break
@@ -217,16 +213,12 @@ class TicTacToe():
                                 col = best_child_pos % 3
                                 row = best_child_pos // 3
                                 x = (col * (SCREEN_WIDTH // 3) + (SCREEN_WIDTH // 3) // 2 + OFFSET)
-                                y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4
-                                y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4 * 2
-                                y_3 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 4 * 3
-                                score = small_font.render(f'score: {best_child.score}', True, BEST_CHILD_COLOR)
+                                y_1 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3
+                                y_2 = row * (SCREEN_HEIGHT // 3) + (SCREEN_HEIGHT // 3) // 3 * 2
                                 visits = small_font.render(f'visits: {best_child.visits}', True, BEST_CHILD_COLOR)
                                 uct = small_font.render(f'UCT: {best_child.uct:.2f}', True, BEST_CHILD_COLOR)
-                                score_rect = score.get_rect(center=(x, y_1))
-                                visits_rect = visits.get_rect(center=(x, y_2))
-                                uct_rect = uct.get_rect(center=(x, y_3))
-                                screen.blit(score, score_rect)
+                                visits_rect = visits.get_rect(center=(x, y_1))
+                                uct_rect = uct.get_rect(center=(x, y_2))
                                 screen.blit(visits, visits_rect)
                                 screen.blit(uct, uct_rect)
                                 break
