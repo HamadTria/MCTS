@@ -4,7 +4,7 @@ from copy import deepcopy
 import time
 from mcts import *
 
-MAX_ITER = 1000
+MAX_ITER = 1
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 LINE_COLOR = (0, 0, 0)
@@ -18,6 +18,8 @@ BUTTON_FONT_COLOR = (255, 255, 255)
 BUTTON_FONT_SIZE = 20
 BUTTON_WIDTH = 100
 BUTTON_HEIGHT = 50
+COLUMN_COUNT = 7
+ROW_COUNT = 6
 
 class ConnectFour():
     def __init__(self, board=None):
@@ -42,29 +44,35 @@ class ConnectFour():
             if '_' in row:
                 return False
         return True
-
+    
     def is_win(self):
-        # horizontal
-        for row in self.position:
-            for col in range(4):
-                if row[col] == row[col+1] == row[col+2] == row[col+3] == self.player_2:
+        # Check horizontal locations for win
+        for c in range(COLUMN_COUNT-3):
+            for r in range(ROW_COUNT):
+                if self.position[r][c] == self.player_2 and self.position[r][c+1] == self.player_2 \
+                    and self.position[r][c+2] == self.player_2 and self.position[r][c+3] == self.player_2:
                     return True
-        # vertical
-        for col in range(7):
-            for row in range(3):
-                if self.position[row][col] == self.position[row+1][col] == self.position[row+2][col] == self.position[row+3][col] == self.player_2:
+
+        # Check vertical locations for win
+        for c in range(COLUMN_COUNT):
+            for r in range(ROW_COUNT-3):
+                if self.position[r][c] == self.player_2 and self.position[r+1][c] == self.player_2 \
+                    and self.position[r+2][c] == self.player_2 and self.position[r+3][c] == self.player_2:
                     return True
-        # diagonal (top-left to bottom-right)
-        for col in range(4):
-            for row in range(3):
-                if self.position[row][col] == self.position[row+1][col+1] == self.position[row+2][col+2] == self.position[row+3][col+3] == self.player_2:
+
+        # Check positively sloped diaganols
+        for c in range(COLUMN_COUNT-3):
+            for r in range(ROW_COUNT-3):
+                if self.position[r][c] == self.player_2 and self.position[r+1][c+1] == self.player_2 \
+                    and self.position[r+2][c+2] == self.player_2 and self.position[r+3][c+3] == self.player_2:
                     return True
-        # diagonal (top-right to bottom-left)
-        for col in range(4, 7):
-            for row in range(3, -1, -1):
-                if self.position[row][col] == self.position[row-1][col-1] == self.position[row-2][col-2] == self.position[row-3][col-3] == self.player_2:
+
+        # Check negatively sloped diaganols
+        for c in range(COLUMN_COUNT-3):
+            for r in range(3, ROW_COUNT):
+                if self.position[r][c] == self.player_2 and self.position[r-1][c+1] == self.player_2 \
+                    and self.position[r-2][c+2] == self.player_2 and self.position[r-3][c+3] == self.player_2:
                     return True
-        return False
 
     def legal_moves(self):
         actions = []
@@ -82,6 +90,10 @@ class ConnectFour():
         button_font = pygame.font.SysFont(None, BUTTON_FONT_SIZE)
         clock = pygame.time.Clock()
 
+        self.draw_board(screen, font)
+        pygame.display.flip()
+        clock.tick(30)
+
         mcts = MCTS()
         while True:
             for event in pygame.event.get():
@@ -98,35 +110,35 @@ class ConnectFour():
 
                     self = self.make_move(col)
 
-                    screen.fill(BG_COLOR)
                     self.draw_board(screen, font)
                     pygame.display.flip()
                     clock.tick(30)
 
                     if self.is_win():
                         winning_combination = self.get_winning_combination()
-                        screen.fill(BG_COLOR)
-                        self.draw_board(screen, font)
-                        pygame.display.flip()
                         self.draw_connecting_line(screen, winning_combination) 
-                        time.sleep(20)                    
-                        self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
+                        time.sleep(5)                    
+                        self.end_game_screen(screen, font, button_font, "Human has won!")
                         return
                     elif self.is_draw():
                         self.end_game_screen(screen, font, button_font, "Game is drawn!")
                         return
 
                     best_move, _ = mcts.search(self, MAX_ITER)
+
+                    pygame.display.flip()
+                    clock.tick(30)
+
                     try:
                         self = best_move.board
+                        self.draw_board(screen, font)
+                        pygame.display.flip()
+                        clock.tick(30)
+
                         if self.is_win():
                             winning_combination = self.get_winning_combination()
-                            screen.fill(BG_COLOR)
-                            self.draw_board(screen, font)
-                            pygame.display.flip()
-                            clock.tick(30)
                             self.draw_connecting_line(screen, winning_combination) 
-                            time.sleep(20)  
+                            time.sleep(4)  
                             self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
                             return
                         elif self.is_draw():
@@ -135,12 +147,8 @@ class ConnectFour():
                     except:
                         pass
 
-            screen.fill(BG_COLOR)
-            self.draw_board(screen, font)
-            pygame.display.flip()
-            clock.tick(30)
-
     def draw_board(self, screen, font):
+        screen.fill(BG_COLOR)
         for i in range(1, 7):
             pygame.draw.line(screen, LINE_COLOR, (0, i * SCREEN_HEIGHT // 6), (SCREEN_WIDTH, i * SCREEN_HEIGHT // 6), 3)
             pygame.draw.line(screen, LINE_COLOR, (i * SCREEN_WIDTH // 7, 0), (i * SCREEN_WIDTH // 7, SCREEN_HEIGHT), 3)
