@@ -136,7 +136,7 @@ class TicTacToe():
                             winning_combination = self.get_winning_combination()
                             self.draw_connecting_line(screen, winning_combination) 
                             time.sleep(3)  
-                            self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
+                            self.end_game_screen(screen, font, button_font, "Machine has won!")
                             return
                         elif self.is_draw():
                             self.end_game_screen(screen, font, button_font, "Game is drawn!")
