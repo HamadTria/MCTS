@@ -139,7 +139,7 @@ class ConnectFour():
                             winning_combination = self.get_winning_combination()
                             self.draw_connecting_line(screen, winning_combination) 
                             time.sleep(4)  
-                            self.end_game_screen(screen, font, button_font, "'%s' has won!" % self.player_2)
+                            self.end_game_screen(screen, font, button_font, "Machine has won!")
                             return
                         elif self.is_draw():
                             self.end_game_screen(screen, font, button_font, "Game is drawn!")
@@ -204,29 +204,33 @@ class ConnectFour():
                         sys.exit()
     
     def get_winning_combination(self):
-        # horizontal
-        for row in range(6):
-            for col in range(4):
-                if self.position[row][col] == self.position[row][col+1] == self.position[row][col+2] == self.position[row][col+3] == self.player_2:
-                    return [(row, col), (row, col+1), (row, col+2), (row, col+3)]
+        # Check horizontal locations for win
+        for c in range(COLUMN_COUNT-3):
+            for r in range(ROW_COUNT):
+                if self.position[r][c] == self.player_2 and self.position[r][c+1] == self.player_2 \
+                    and self.position[r][c+2] == self.player_2 and self.position[r][c+3] == self.player_2:
+                    return [(r, c), (r, c+1), (r, c+2), (r, c+3)]
 
-        # vertical
-        for col in range(7):
-            for row in range(3):
-                if self.position[row][col] == self.position[row+1][col] == self.position[row+2][col] == self.position[row+3][col] == self.player_2:
-                    return [(row, col), (row+1, col), (row+2, col), (row+3, col)]
+        # Check vertical locations for win
+        for c in range(COLUMN_COUNT):
+            for r in range(ROW_COUNT-3):
+                if self.position[r][c] == self.player_2 and self.position[r+1][c] == self.player_2 \
+                    and self.position[r+2][c] == self.player_2 and self.position[r+3][c] == self.player_2:
+                    return [(r, c), (r+1, c), (r+2, c), (r+3, c)]
 
-        # diagonal (top-left to bottom-right)
-        for col in range(4):
-            for row in range(3):
-                if self.position[row][col] == self.position[row+1][col+1] == self.position[row+2][col+2] == self.position[row+3][col+3] == self.player_2:
-                    return [(row, col), (row+1, col+1), (row+2, col+2), (row+3, col+3)]
+        # Check positively sloped diaganols
+        for c in range(COLUMN_COUNT-3):
+            for r in range(ROW_COUNT-3):
+                if self.position[r][c] == self.player_2 and self.position[r+1][c+1] == self.player_2 \
+                    and self.position[r+2][c+2] == self.player_2 and self.position[r+3][c+3] == self.player_2:
+                    return [(r, c), (r+1, c+1), (r+2, c+2), (r+3, c+3)]
 
-        # diagonal (top-right to bottom-left)
-        for col in range(4, 7):
-            for row in range(3, -1, -1):
-                if self.position[row][col] == self.position[row-1][col-1] == self.position[row-2][col-2] == self.position[row-3][col-3] == self.player_2:
-                    return [(row, col), (row-1, col-1), (row-2, col-2), (row-3, col-3)]
+        # Check negatively sloped diaganols
+        for c in range(COLUMN_COUNT-3):
+            for r in range(3, ROW_COUNT):
+                if self.position[r][c] == self.player_2 and self.position[r-1][c+1] == self.player_2 \
+                    and self.position[r-2][c+2] == self.player_2 and self.position[r-3][c+3] == self.player_2:
+                    return [(r, c), (r-1, c+1), (r-2, c+2), (r-3, c+3)]
 
     def draw_connecting_line(self, screen, winning_combination):
         start_row, start_col = winning_combination[0]
