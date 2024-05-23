@@ -4,7 +4,7 @@ from copy import deepcopy
 import time
 from mcts import *
 
-MAX_ITER = 1000
+MAX_ITER = 2
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
 OFFSET = 600
@@ -114,7 +114,7 @@ class TicTacToe():
                         winning_combination = self.get_winning_combination()
                         self.draw_connecting_line(screen, winning_combination) 
                         time.sleep(3)                    
-                        self.end_game_screen(screen, font, button_font, "Human has won!" % self.player_2)
+                        self.end_game_screen(screen, font, button_font, "Human has won!")
                         return
                     elif self.is_draw():
                         self.end_game_screen(screen, font, button_font, "Game is drawn!")
