@@ -12,6 +12,7 @@ class Node():
         self.parent = parent
         self.visits = 0
         self.score = 0
+        self.uct = 0
         self.children = {}
 
 class MCTS():
@@ -23,7 +24,10 @@ class MCTS():
             score = self.rollout(node.board)
             self.backpropagate(node, score)
 
-        return self.get_best_move(self.root, 0)
+        best_move = self.get_best_move(self.root, 0)
+        children = self.root.children
+
+        return best_move, children
     
     def select(self, node):
         while not node.is_terminal:
@@ -50,8 +54,9 @@ class MCTS():
                 board = random.choice(board.legal_moves())
             except:
                 return 0
-        if board.player_2 == 'x': return 1
-        elif board.player_2 == 'o': return -1
+        if board.player_2 == 'HUMAN': 
+            return 1
+        return -1
                 
     def backpropagate(self, node, score):
         while node is not None:
@@ -64,12 +69,13 @@ class MCTS():
         best_moves = []
 
         for child_node in node.children.values():
-            if child_node.board.player_2 == 'x': current_player = 1
-            elif child_node.board.player_2 == 'o': current_player = -1
+            if child_node.board.player_2 == 'HUMAN': current_player = 1
+            elif child_node.board.player_2 == 'AI': current_player = -1
 
             exploration = exploration_constant * math.sqrt(math.log(node.visits / child_node.visits))   
             exploitation = current_player * child_node.score / child_node.visits                                  
             move_score = exploitation + exploration
+            child_node.uct = move_score
             
             if move_score > best_score:
                 best_score = move_score

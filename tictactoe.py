@@ -1,6 +1,3 @@
-from copy import deepcopy
-from mcts import *
-
 MAX_ITER = 1000
 
 class TicTacToe():
@@ -73,11 +70,20 @@ class TicTacToe():
                 self = self.make_move(pos)
                 print(self)
 
+                if self.is_win():
+                    print('player "%s" has won the game!\n' % self.player_2)
+                    break
+                elif self.is_draw():
+                    print('Game is drawn!\n')
+                    break
+
                 best_move = mcts.search(self, MAX_ITER)
+
                 try:
                     self = best_move.board
                 except:
                     pass
+                
                 print(self)
 
                 if self.is_win():
@@ -109,3 +115,7 @@ class TicTacToe():
 if __name__ == '__main__':
     board = TicTacToe()
     board.game_loop()
+        
+            
+    
+    
