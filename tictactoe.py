@@ -1,9 +1,12 @@
+from copy import deepcopy
+from mcts import *
+
 MAX_ITER = 1000
 
 class TicTacToe():
     def __init__(self, board=None):
-        self.player_1 = 'x'
-        self.player_2 = 'o'
+        self.player_1 = 'HUMAN'
+        self.player_2 = 'AI'
         self.empty_square = '_'
         self.position = {}
         self.init_board()
@@ -78,20 +81,19 @@ class TicTacToe():
                     break
 
                 best_move = mcts.search(self, MAX_ITER)
+                print('AI move:', best_move)
 
                 try:
                     self = best_move.board
+                    print(self)
+                    if self.is_win():
+                        print('player "%s" has won the game!\n' % self.player_2)
+                        break
+                    elif self.is_draw():
+                        print('Game is drawn!\n')
+                        break
                 except:
                     pass
-                
-                print(self)
-
-                if self.is_win():
-                    print('player "%s" has won the game!\n' % self.player_2)
-                    break
-                elif self.is_draw():
-                    print('Game is drawn!\n')
-                    break
             
             except Exception as e:
                 print('  Error:', e)
