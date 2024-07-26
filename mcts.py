@@ -1,5 +1,6 @@
 import math
 import random
+import time
 
 class Node():
     def __init__(self, board, parent):
@@ -19,6 +20,7 @@ class MCTS():
     def search(self, initial_state, max_iterations=1000):
         self.root = Node(initial_state, None)
 
+        start_time = time.time()
         for _ in range(max_iterations):
             node = self.select(self.root)
             score = self.rollout(node.board)
@@ -27,6 +29,7 @@ class MCTS():
         best_move = self.get_best_move(self.root, 0)
         children = self.root.children
 
+        print(f"Time taken: {time.time() - start_time}")
         return best_move, children
     
     def select(self, node):
