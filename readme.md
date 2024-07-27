@@ -2,6 +2,24 @@
 
 This repository contains implementations of popular board games with AI opponents using the Monte Carlo Tree Search (MCTS) algorithm. The games included are Connect Four and Tic-Tac-Toe. Both graphical versions (using [Pygame](https://github.com/pygame/pygame)) are provided.
 
+## Usage
+
+### Running Connect Four
+
+To run the Connect Four game, execute the following command or run `connect4_pygame.py` using your IDE:
+
+```bash
+python connect4_pygame.py
+```
+
+### Running Tictactoe
+
+Same thing, execute the following command or run `tictactoe_pygame.py` using your IDE:
+
+```bash
+python tictactoe_pygame.py
+```
+
 ## Screenshots
 
 ### Tictactoe vs Machine
@@ -54,24 +72,6 @@ pip install pygame
 - **Features**:
   - `Node` class representing a node in the MCTS tree.
   - `MCTS` class managing the MCTS process, including selection, expansion, simulation (rollout), and backpropagation.
-
-## Usage
-
-## Running Connect Four
-
-To run the Connect Four game, execute the following command or run `connect4_pygame.py` using your IDE:
-
-```bash
-python connect4_pygame.py
-```
-
-## Running Tictactoe
-
-Same thing, execute the following command or run `tictactoe_pygame.py` using your IDE:
-
-```bash
-python tictactoe_pygame.py
-```
 
 ## Contributing
 
